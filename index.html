@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Definição de Domínios do Sistema de Autoatendimento</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .domain-card { transition: all 0.3s ease-in-out; }
+        .domain-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); }
+        .domain-card.active { border-color: #2563eb; transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); }
+        .details-section { transition: opacity 0.5s ease-in-out; }
+        .details-content ul { list-style-position: inside; }
+        .details-content li { margin-bottom: 0.5rem; }
+        .connector { position: absolute; background-color: #9ca3af; z-index: -1; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div class="container mx-auto px-4 py-8 md:py-12">
+        <header class="text-center mb-12">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-900">Maná Food - Arquitetura de Domínios (DDD)</h1>
+            <p class="mt-2 text-lg text-slate-600">Uma exploração interativa das definições de escopo do sistema de autoatendimento da lanchonete.</p>
+        </header>
+
+        <main class="flex flex-col lg:flex-row gap-8 items-start">
+            
+            <section id="diagram-section" class="w-full lg:w-1/2 flex-shrink-0">
+                <h2 class="text-xl font-bold text-center mb-6 text-slate-700">Clique em um domínio para ver os detalhes</h2>
+                <div class="relative min-h-[500px] md:min-h-[600px] flex items-center justify-center p-4">
+                    <div id="connectors-container" class="absolute top-0 left-0 w-full h-full"></div>
+
+                    <div id="core-domain-container" class="relative">
+                        <div id="core-domain" data-domain-id="core" class="domain-card cursor-pointer bg-blue-600 text-white rounded-lg p-6 w-56 h-32 flex flex-col justify-center items-center text-center shadow-lg border-4 border-transparent">
+                            <span class="text-sm font-semibold uppercase tracking-wider">Domínio Principal</span>
+                            <h3 class="text-lg font-bold mt-1">Processamento de Pedidos e Autoatendimento</h3>
+                        </div>
+                    </div>
+
+                    <div id="supporting-domains-container" class="absolute top-0 left-0 w-full h-full">
+                        </div>
+                </div>
+            </section>
+
+            <aside id="details-section" class="w-full lg:w-1/2 bg-white rounded-xl shadow-lg p-6 md:p-8 sticky top-8 min-h-[300px]">
+                <div id="details-placeholder" class="flex flex-col items-center justify-center h-full text-center text-slate-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p class="font-semibold">Selecione um domínio no diagrama</p>
+                    <p class="text-sm mt-1">As informações detalhadas sobre o domínio selecionado aparecerão aqui.</p>
+                </div>
+                <div id="details-content" class="details-content hidden">
+                    </div>
+            </aside>
+        </main>
+    </div>
+
+    <script>
+        const domainData = {
+            core: {
+                title: 'Processamento de Pedidos e Autoatendimento',
+                type: 'Domínio Principal',
+                color: 'bg-blue-600',
+                definition: 'Responsável por gerenciar a jornada completa do cliente no autoatendimento, permitindo a criação, personalização, finalização e acompanhamento de pedidos, sendo a principal interface de valor para o usuário final.',
+                responsibilities: [
+                    'Gerenciamento do fluxo de autoatendimento do cliente.',
+                    'Permissão para o cliente se <strong>identificar (via CPF ou cadastro)</strong> ou prosseguir de forma <strong>anônima</strong>.',
+                    'Habilitação da <strong>montagem do combo</strong> (lanche, acompanhamento, bebida, sobremesa) com base nas opções de produtos.',
+                    'Finalização do <strong>pedido</strong> e orquestração da integração com o processo de pagamento.',
+                    'Controle e exibição do <strong>status do pedido</strong> para o cliente (Recebido, Em Preparação, Pronto, Finalizado).',
+                    'Notificação ao cliente quando o <strong>pedido estiver pronto para retirada</strong>.'
+                ],
+                ubiquitousLanguage: ['Pedido', 'Combo', 'Cliente Anônimo', 'Pedido Confirmado', 'Status do Pedido', 'Retirada do Pedido', 'Item de Pedido']
+            },
+            supporting: [
+                {
+                    id: 'products',
+                    title: 'Gerenciamento de Cardápio e Produtos',
+                    type: 'Domínio de Suporte',
+                    color: 'bg-teal-600',
+                    definition: 'Gerencia o catálogo de produtos oferecidos, incluindo suas características e categorias, sendo fundamental para a exibição e seleção de itens no autoatendimento.',
+                    responsibilities: [
+                        'Definição e manutenção do <strong>catálogo de produtos</strong> disponíveis para venda.',
+                        'Organização dos produtos em <strong>categorias fixas</strong> (Lanche, Acompanhamento, Bebida, Sobremesa).',
+                        'Armazenamento de informações como <strong>nome, descrição, preço e imagens</strong> de cada produto.',
+                        'Suporte às operações de <strong>criação, edição e remoção de produtos</strong> através do painel administrativo.'
+                    ],
+                    ubiquitousLanguage: ['Produto', 'Categoria', 'Cardápio', 'Item de Venda', 'Preço', 'Descrição']
+                },
+                {
+                    id: 'customers',
+                    title: 'Gerenciamento de Clientes',
+                    type: 'Domínio de Suporte',
+                    color: 'bg-amber-600',
+                    definition: 'Administra o cadastro e os dados dos clientes, viabilizando a identificação no sistema e o uso dessas informações para fins de relacionamento e marketing.',
+                    responsibilities: [
+                        'Registro e manutenção de <strong>dados de clientes</strong> (nome, e-mail, CPF).',
+                        'Suporte à <strong>identificação do cliente via CPF</strong> no fluxo de autoatendimento.',
+                        'Disponibilização de funcionalidades para <strong>gerenciar a base de clientes</strong> no painel administrativo.'
+                    ],
+                    ubiquitousLanguage: ['Cliente', 'Cadastro de Cliente', 'Dados do Cliente', 'Identificação']
+                },
+                {
+                    id: 'operations',
+                    title: 'Acompanhamento Operacional de Pedidos',
+                    type: 'Domínio de Suporte',
+                    color: 'bg-indigo-600',
+                    definition: 'Fornece as ferramentas e informações necessárias para a equipe da cozinha e a administração acompanharem e gerenciarem o fluxo de preparo e entrega dos pedidos.',
+                    responsibilities: [
+                        'Exibição dos <strong>pedidos na fila de preparo</strong> para a equipe da cozinha (monitor de preparo).',
+                        'Permissão para a equipe da cozinha <strong>atualizar o status do pedido</strong> (ex: Em Preparação, Pronto).',
+                        'Fornecimento de informações para o painel administrativo, como <strong>pedidos em andamento</strong> e <strong>tempo de espera</strong>.',
+                        'Organização e gerenciamento da <strong>fila de produção</strong> para a cozinha.'
+                    ],
+                    ubiquitousLanguage: ['Fila de Pedidos', 'Ordem de Serviço (Cozinha)', 'Tempo de Espera', 'Pedido Pronto para Cozinha']
+                },
+                {
+                    id: 'payments',
+                    title: 'Processamento de Pagamentos Externos',
+                    type: 'Domínio de Suporte',
+                    color: 'bg-rose-600',
+                    definition: 'Gerencia a comunicação e a transação com provedores de pagamento terceirizados, como o Mercado Pago, para processar os pagamentos dos pedidos.',
+                    responsibilities: [
+                        'Integração com a API do <strong>Mercado Pago</strong> para geração de <strong>QR Codes de pagamento</strong>.',
+                        'Recebimento e validação da <strong>confirmação de pagamento</strong> do provedor externo.',
+                        'Comunicação do <strong>status do pagamento</strong> (aprovado/recusado) para o Domínio Principal.'
+                    ],
+                    ubiquitousLanguage: ['Transação de Pagamento', 'Gateway de Pagamento', 'QR Code', 'Confirmação de Pagamento']
+                }
+            ]
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const diagramSection = document.getElementById('diagram-section');
+            const coreDomainEl = document.getElementById('core-domain');
+            const supportingContainer = document.getElementById('supporting-domains-container');
+            const connectorsContainer = document.getElementById('connectors-container');
+            const detailsPlaceholder = document.getElementById('details-placeholder');
+            const detailsContent = document.getElementById('details-content');
+
+            let activeDomainId = null;
+
+            function positionSupportingDomains() {
+                const supportingDomains = domainData.supporting;
+                const radius = diagramSection.offsetWidth / 2.7;
+                const angleStep = (2 * Math.PI) / supportingDomains.length;
+                
+                supportingContainer.innerHTML = ''; 
+
+                supportingDomains.forEach((domain, index) => {
+                    const angle = angleStep * index - (Math.PI / 2);
+                    const x = (diagramSection.offsetWidth / 2) + radius * Math.cos(angle) - 64; // 64 is half width
+                    const y = (diagramSection.offsetHeight / 2) + radius * Math.sin(angle) - 48; // 48 is half height
+                    
+                    const domainEl = document.createElement('div');
+                    domainEl.dataset.domainId = domain.id;
+                    domainEl.className = `domain-card absolute cursor-pointer ${domain.color} text-white rounded-lg p-4 w-40 h-28 flex flex-col justify-center items-center text-center shadow-md border-4 border-transparent`;
+                    domainEl.style.left = `${x}px`;
+                    domainEl.style.top = `${y}px`;
+                    domainEl.innerHTML = `
+                        <span class="text-xs font-semibold uppercase tracking-wider">Domínio de Suporte</span>
+                        <h3 class="text-base font-bold mt-1">${domain.title}</h3>
+                    `;
+                    supportingContainer.appendChild(domainEl);
+                });
+                drawConnectors();
+            }
+
+            function drawConnectors() {
+                const coreRect = coreDomainEl.getBoundingClientRect();
+                const diagramRect = diagramSection.getBoundingClientRect();
+                
+                const coreCenterX = coreRect.left - diagramRect.left + coreRect.width / 2;
+                const coreCenterY = coreRect.top - diagramRect.top + coreRect.height / 2;
+                
+                connectorsContainer.innerHTML = '';
+                
+                document.querySelectorAll('#supporting-domains-container .domain-card').forEach(supEl => {
+                    const supRect = supEl.getBoundingClientRect();
+                    const supCenterX = supRect.left - diagramRect.left + supRect.width / 2;
+                    const supCenterY = supRect.top - diagramRect.top + supRect.height / 2;
+                    
+                    const angle = Math.atan2(supCenterY - coreCenterY, supCenterX - coreCenterX) * 180 / Math.PI;
+                    const distance = Math.sqrt(Math.pow(supCenterX - coreCenterX, 2) + Math.pow(supCenterY - coreCenterY, 2));
+
+                    const line = document.createElement('div');
+                    line.className = 'connector';
+                    line.style.width = `${distance}px`;
+                    line.style.height = '2px';
+                    line.style.left = `${coreCenterX}px`;
+                    line.style.top = `${coreCenterY}px`;
+                    line.style.transformOrigin = '0 0';
+                    line.style.transform = `rotate(${angle}deg)`;
+                    connectorsContainer.appendChild(line);
+                });
+            }
+
+            function updateDetails(domainId) {
+                const data = domainId === 'core' ? domainData.core : domainData.supporting.find(d => d.id === domainId);
+
+                if (!data) return;
+
+                detailsPlaceholder.classList.add('hidden');
+                detailsContent.classList.remove('hidden');
+                detailsContent.style.opacity = 0;
+
+                detailsContent.innerHTML = `
+                    <div class="border-b-2 pb-4 mb-4">
+                        <span class="text-sm font-semibold uppercase tracking-wider ${data.type === 'Domínio Principal' ? 'text-blue-600' : 'text-slate-500'}">${data.type}</span>
+                        <h2 class="text-2xl font-bold text-slate-900 mt-1">${data.title}</h2>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-slate-800 mb-2">Definição</h3>
+                        <p class="text-slate-600 mb-6">${data.definition}</p>
+
+                        <h3 class="text-lg font-semibold text-slate-800 mb-2">Responsabilidades-chave</h3>
+                        <ul class="text-slate-600 mb-6 pl-2">
+                            ${data.responsibilities.map(r => `<li>- ${r}</li>`).join('')}
+                        </ul>
+
+                        <h3 class="text-lg font-semibold text-slate-800 mb-2">Linguagem Ubíqua Comum</h3>
+                        <div class="flex flex-wrap gap-2">
+                            ${data.ubiquitousLanguage.map(l => `<span class="bg-slate-100 text-slate-700 text-sm font-medium px-3 py-1 rounded-full">${l}</span>`).join('')}
+                        </div>
+                    </div>
+                `;
+                setTimeout(() => { detailsContent.style.opacity = 1; }, 50);
+            }
+            
+            function handleDomainClick(e) {
+                const card = e.target.closest('.domain-card');
+                if (!card) return;
+
+                const domainId = card.dataset.domainId;
+
+                if (activeDomainId === domainId) return;
+
+                if (activeDomainId) {
+                    const previousActive = document.querySelector(`[data-domain-id="${activeDomainId}"]`);
+                    if (previousActive) previousActive.classList.remove('active');
+                }
+
+                card.classList.add('active');
+                activeDomainId = domainId;
+                
+                updateDetails(domainId);
+            }
+            
+            diagramSection.addEventListener('click', handleDomainClick);
+            
+            positionSupportingDomains();
+            window.addEventListener('resize', () => {
+                positionSupportingDomains();
+            });
+        });
+    </script>
+</body>
+</html>
